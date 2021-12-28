@@ -4,15 +4,17 @@ pragma solidity ^0.8.0;
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+struct Payout {
+    address payable addr;
+    uint8 percent;
+}
+
 contract PledgeV1 is Ownable {
     address payable[] public receivers; // need to store receivers as array to iterate receiversToPercent
     mapping(address => uint8) public receiversToPercent; // receiving address => percentage (0-100)
 
-    constructor(
-        address payable[] memory _receivers, // address of receivers
-        uint8[] memory _percentages // percentage each receiver gets of TOTAL payment
-    ) {
-        updateDistributions(_receivers, _percentages);
+    constructor(Payout[] memory _payouts) {
+        setPayouts(_payouts);
     }
 
     function getReceiverPercent(address payable _receiver)
@@ -28,9 +30,9 @@ contract PledgeV1 is Ownable {
         uint8 _sumOfPercentages = 0; // max 100
 
         // Send percentage of msg.value to each receiver
-        for (uint256 i = 0; i < receivers.length; i++) {
+        for (uint8 i = 0; i < receivers.length; i++) {
             address payable _receiver = receivers[i];
-            uint8 _receiverPercent = getReceiverPercent(_receiver);
+            uint8 _receiverPercent = getReceiverPercent(receivers[i]);
             uint256 _amountToSend = (msg.value / 100) * _receiverPercent;
             // Attempt to pay receiver
             (bool success, ) = _receiver.call{value: _amountToSend}("");
@@ -46,7 +48,7 @@ contract PledgeV1 is Ownable {
                     )
                 )
             );
-            
+
             _sumOfPercentages += _receiverPercent; // Sum percentage distributions each time? -> one less thing in storage (owner and their distribution percentage)
         }
 
@@ -72,14 +74,12 @@ contract PledgeV1 is Ownable {
 
     // Updates User's distribution receivers and their percentages
     // Can be called from inside and outside the contract but only by the User
-    function updateDistributions(
-        address payable[] memory _receivers,
-        uint8[] memory _percentages
-    ) public onlyOwner {
-        receivers = _receivers;
-        require(_percentages.length == _receivers.length, "INVALID_INPUT");
-        for (uint256 i = 0; i < _receivers.length; i++) {
-            receiversToPercent[receivers[i]] = _percentages[i]; // Allocate receivers and their percentages of each total payment
+    function setPayouts(Payout[] memory _payouts) public onlyOwner {
+        receivers = new address payable[](_payouts.length);
+        for (uint8 i = 0; i < _payouts.length; i++) {
+            Payout memory payout = _payouts[i];
+            receivers.push(payout.addr);
+            receiversToPercent[payout.addr] = payout.percent; // Allocate receivers and their percentages of each total payment
         }
     }
 }

@@ -9,7 +9,12 @@ describe("Pledge", () => {
       const [_, receiver] = await ethers.getSigners();
 
       const Pledge = await ethers.getContractFactory("PledgeV1");
-      const pledge = await Pledge.deploy([receiver.address], [40]);
+      const pledge = await Pledge.deploy([
+        {
+          addr: receiver.address,
+          percent: 40,
+        },
+      ]);
       await pledge.deployed();
 
       expect(await pledge.getReceiverPercent(receiver.address)).to.equal(40);
@@ -26,7 +31,12 @@ describe("Pledge", () => {
         [_, receiver, sender] = await ethers.getSigners();
 
         const Pledge = await ethers.getContractFactory("PledgeV1");
-        pledge = await Pledge.deploy([receiver.address], [40]);
+        pledge = await Pledge.deploy([
+          {
+            addr: receiver.address,
+            percent: 40,
+          },
+        ]);
         await pledge.deployed();
       });
 
@@ -51,4 +61,14 @@ describe("Pledge", () => {
       });
     });
   });
+
+  // describe("setReceiverPercent", () => {
+  //   it("when receiver exists", () => {
+  //     // TODO
+  //   });
+
+  //   it("when receiver does not exist", () => {
+  //     // TODO
+  //   });
+  // });
 });
