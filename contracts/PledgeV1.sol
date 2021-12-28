@@ -94,4 +94,19 @@ contract PledgeV1 is Ownable {
         );
         receiversToPercent[_receiver] = percent;
     }
+
+    // Bulk update existing payouts
+    function updatePayouts(Payout[] memory _payouts)
+        public
+        onlyOwner
+    {
+        for (uint8 i = 0; i < _payouts.length; i++) {
+            Payout memory payout = _payouts[i];
+            require(
+                receiversToPercent[payout.addr] != 0,
+                string("Receiver not found")
+            );
+            setReceiverPercent(payout.addr, payout.percent);
+        }
+    }
 }
