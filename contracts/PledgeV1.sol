@@ -82,4 +82,16 @@ contract PledgeV1 is Ownable {
             receiversToPercent[payout.addr] = payout.percent; // Allocate receivers and their percentages of each total payment
         }
     }
+
+    // Set payout percentage for given receiver address.
+    function setReceiverPercent(address payable _receiver, uint8 percent)
+        public
+        onlyOwner
+    {
+        require(
+            receiversToPercent[_receiver] != 0,
+            string("Receiver not found")
+        );
+        receiversToPercent[_receiver] = percent;
+    }
 }
