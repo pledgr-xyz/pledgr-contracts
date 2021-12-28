@@ -4,9 +4,9 @@ pragma solidity ^0.8.0;
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Pledge is Ownable {
+contract PledgeV1 is Ownable {
     address payable[] receivers; // need to store receivers as array to iterate receiversToPercent
-    mapping(address => uint8) receiversToPercent; // receiving address => percentage
+    mapping(address => uint8) receiversToPercent; // receiving address => percentage (0-100)
 
     constructor(
         address payable[] memory _receivers, // address of receivers
@@ -17,14 +17,14 @@ contract Pledge is Ownable {
 
     // Receives eth and distributes to receivers
     receive() external payable {
-        uint8 _sumOfPercentages = 0;
+        uint8 _sumOfPercentages = 0; // max 100
 
         // Send percentage of msg.value to each receiver
         for (uint256 i = 0; i < receivers.length; i++) {
             address payable _receiver = receivers[i];
             uint8 _receiverPercent = receiversToPercent[_receiver];
             _sumOfPercentages += receiversToPercent[_receiver]; // Sum percentage distributions each time? -> one less thing in storage (owner and their distribution percentage)
-            uint256 _amountToSend = msg.value * _receiverPercent;
+            uint256 _amountToSend = msg.value * 100 / _receiverPercent;
 
             // Attempt to pay receiver
             (bool sent,) = _receiver.call{
@@ -45,7 +45,7 @@ contract Pledge is Ownable {
             );
         }
 
-        uint256 _remainingPercentage = 1 - _sumOfPercentages;
+        uint256 _remainingPercentage = 100 - _sumOfPercentages;
         uint256 _amountForOwner = msg.value * _remainingPercentage;
 
         // Send remainder to owner

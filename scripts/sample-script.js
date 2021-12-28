@@ -17,7 +17,7 @@ async function main() {
   const Pledge = await hre.ethers.getContractFactory("PledgeV1");
   const pledge = await Pledge.deploy(
     ["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"],
-    [0.4]
+    [40]
   );
 
   await pledge.deployed();
