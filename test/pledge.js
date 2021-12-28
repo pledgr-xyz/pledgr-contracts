@@ -6,43 +6,49 @@ const { provider } = waffle;
 describe("Pledge", () => {
   describe("deployment", () => {
     it("Should set storage correctly", async function () {
-      const [_, addrA] = await ethers.getSigners();
-
-      const Pledge = await ethers.getContractFactory("PledgeV1");
-      const pledge = await Pledge.deploy([addrA.address], [40]);
-      await pledge.deployed();
-
-      expect(await pledge.getReceiverPercent(addrA.address)).to.equal(40);
-    });
-  });
-
-  describe("recieve", () => {
-    it("with one receiver", async () => {
-      const [_, receiver, sender] = await ethers.getSigners();
-      expect(await provider.getBalance(receiver.address)).to.equal(
-        ethers.utils.parseUnits("10000.0")
-      );
+      const [_, receiver] = await ethers.getSigners();
 
       const Pledge = await ethers.getContractFactory("PledgeV1");
       const pledge = await Pledge.deploy([receiver.address], [40]);
       await pledge.deployed();
 
-      const tx = await sender.sendTransaction({
-        from: sender.address,
-        to: pledge.address,
-        value: ethers.utils.parseEther("1"),
-      });
-      const txReceipt = await tx.wait();
+      expect(await pledge.getReceiverPercent(receiver.address)).to.equal(40);
+    });
+  });
 
-      expect(await provider.getBalance(receiver.address)).to.equal(
-        ethers.utils.parseUnits("10000.4")
-      );
-      expect(await provider.getBalance(sender.address)).to.equal(
-        ethers.utils
-          .parseEther("10000")
-          .sub(ethers.utils.parseEther("0.6"))
-          .sub(txReceipt.gasUsed.mul(txReceipt.effectiveGasPrice))
-      );
+  describe("recieve", () => {
+    describe("with one receiver", async () => {
+      let receiver;
+      let sender;
+      let pledge;
+
+      beforeEach(async () => {
+        [_, receiver, sender] = await ethers.getSigners();
+
+        const Pledge = await ethers.getContractFactory("PledgeV1");
+        pledge = await Pledge.deploy([receiver.address], [40]);
+        await pledge.deployed();
+      });
+
+      it("executes distribution correctly", async () => {
+        const initialReceiverBalance = await provider.getBalance(
+          receiver.address
+        );
+        const initialOwnerBalance = await provider.getBalance(pledge.owner());
+
+        await sender.sendTransaction({
+          from: sender.address,
+          to: pledge.address,
+          value: ethers.utils.parseEther("1"),
+        });
+
+        expect(await provider.getBalance(receiver.address)).to.equal(
+          initialReceiverBalance.add(ethers.utils.parseEther("0.4"))
+        );
+        expect(await provider.getBalance(pledge.owner())).to.equal(
+          initialOwnerBalance.add(ethers.utils.parseEther("0.6"))
+        );
+      });
     });
   });
 });

@@ -15,7 +15,11 @@ contract PledgeV1 is Ownable {
         updateDistributions(_receivers, _percentages);
     }
 
-    function getReceiverPercent(address payable _receiver) public view returns (uint8) {
+    function getReceiverPercent(address payable _receiver)
+        public
+        view
+        returns (uint8)
+    {
         return receiversToPercent[_receiver];
     }
 
@@ -27,28 +31,27 @@ contract PledgeV1 is Ownable {
         for (uint256 i = 0; i < receivers.length; i++) {
             address payable _receiver = receivers[i];
             uint8 _receiverPercent = getReceiverPercent(_receiver);
-            _sumOfPercentages += _receiverPercent; // Sum percentage distributions each time? -> one less thing in storage (owner and their distribution percentage)
-            uint256 _amountToSend = (msg.value * 100) / _receiverPercent;
-
+            uint256 _amountToSend = (msg.value / 100) * _receiverPercent;
             // Attempt to pay receiver
-            (bool sent, ) = _receiver.call{value: _amountToSend}("");
-
+            (bool success, ) = _receiver.call{value: _amountToSend}("");
             // Check payment was successful
             require(
-                sent,
+                success,
                 string(
                     abi.encodePacked(
                         "Failed to send ",
                         _amountToSend,
-                        "Ether to ",
+                        " Ether to ",
                         _receiver
                     )
                 )
             );
+            
+            _sumOfPercentages += _receiverPercent; // Sum percentage distributions each time? -> one less thing in storage (owner and their distribution percentage)
         }
 
         uint256 _remainingPercentage = 100 - _sumOfPercentages;
-        uint256 _amountForOwner = msg.value * _remainingPercentage;
+        uint256 _amountForOwner = (msg.value / 100) * _remainingPercentage;
 
         // Send remainder to owner
         (bool ownerSent, ) = owner().call{value: _amountForOwner}("");
@@ -58,7 +61,7 @@ contract PledgeV1 is Ownable {
                 abi.encodePacked(
                     "Failed to send ",
                     _amountForOwner,
-                    "Ether to owner"
+                    " Ether to owner"
                 )
             )
         );
