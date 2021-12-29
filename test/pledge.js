@@ -62,13 +62,40 @@ describe("Pledge", () => {
     });
   });
 
-  // describe("setReceiverPercent", () => {
-  //   it("when receiver exists", () => {
-  //     // TODO
-  //   });
+  describe("setReceiverPercent", () => {
+    let receiver1;
+    let receiver2
+    let pledge;
 
-  //   it("when receiver does not exist", () => {
-  //     // TODO
-  //   });
-  // });
+    beforeEach(async () => {
+      [_, receiver1, receiver2] = await ethers.getSigners();
+
+      const Pledge = await ethers.getContractFactory("PledgeV1");
+      pledge = await Pledge.deploy([
+        {
+          addr: receiver1.address,
+          percent: 40,
+        },
+      ]);
+      await pledge.deployed();
+    });
+
+    it("when receiver exists", async () => {
+      await pledge.setReceiverPercent(receiver1.address, 30);
+      const updatedReceiverPercent = await pledge.getReceiverPercent(
+        receiver1.address
+      );
+      console.log('updated receiver percent: ', updatedReceiverPercent);
+      expect(updatedReceiverPercent).to.equal(30);
+    });
+
+    it("when receiver does not exist", async () => {
+      await pledge.setReceiverPercent(receiver2.address, 20);
+      const updatedReceiver2Percent = await pledge.getReceiverPercent(
+        receiver2.address
+      );
+      console.log('updated receiver percent: ', updatedReceiver2Percent);
+      expect(updatedReceiver2Percent).to.equal(20);
+    });
+  });
 });
