@@ -1,6 +1,19 @@
-# Basic Sample Hardhat Project
+# pledgr-contracts
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
+Pledgr contracts.
+
+## Development
+
+### Dependencies
+
+- Coinmarketcap API key
+
+### Getting started
+
+1. Create a `.env` file
+1. Run `npx hardhat test` to test
+
+### Hardhat commands
 
 Try running some of the following tasks:
 
