@@ -13,3 +13,7 @@ Gas: 1319448
 ##### With struct (`d98c5dd667ddf04af414e782f6447ba6ea8fcd16`)
 
 Gas: 1290827
+
+### receive method
+
+Gas for tx: 62200

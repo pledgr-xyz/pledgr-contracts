@@ -25,15 +25,15 @@ contract PledgeV1 is Ownable {
         return receiversToPercent[_receiver];
     }
 
-    // Receives eth and distributes to receivers
-    receive() external payable {
+    function distribute(uint256 _value) public payable {
         uint8 _sumOfPercentages = 0; // max 100
-
-        // Send percentage of msg.value to each receiver
+        // Send percentage of _value to each receiver
         for (uint8 i = 0; i < receivers.length; i++) {
             address payable _receiver = receivers[i];
+
             uint8 _receiverPercent = getReceiverPercent(receivers[i]);
-            uint256 _amountToSend = (msg.value / 100) * _receiverPercent;
+            uint256 _amountToSend = (_value / 100) * _receiverPercent;
+
             // Attempt to pay receiver
             (bool success, ) = _receiver.call{value: _amountToSend}("");
             // Check payment was successful
@@ -52,8 +52,8 @@ contract PledgeV1 is Ownable {
             _sumOfPercentages += _receiverPercent; // Sum percentage distributions each time? -> one less thing in storage (owner and their distribution percentage)
         }
 
-        uint256 _remainingPercentage = 100 - _sumOfPercentages;
-        uint256 _amountForOwner = (msg.value / 100) * _remainingPercentage;
+        uint8 _remainingPercentage = 100 - _sumOfPercentages;
+        uint256 _amountForOwner = (_value / 100) * _remainingPercentage;
 
         // Send remainder to owner
         (bool ownerSent, ) = owner().call{value: _amountForOwner}("");
@@ -67,6 +67,11 @@ contract PledgeV1 is Ownable {
                 )
             )
         );
+    }
+
+    // Receives eth and distributes to receivers
+    receive() external payable {
+        distribute(msg.value);
     }
 
     // If msg.data is not empty
@@ -85,7 +90,7 @@ contract PledgeV1 is Ownable {
 
     // Set payout percentage for given receiver address. Adds new receiver to payouts if it doesn't already exist
     function setReceiverPercent(address payable _receiver, uint8 percent)
-        public
+        external
         onlyOwner
     {
         if (receiversToPercent[_receiver] != 0) {
@@ -97,14 +102,14 @@ contract PledgeV1 is Ownable {
     }
 
     // Bulk update existing payouts
-    function updatePayouts(Payout[] memory _payouts) public onlyOwner {
+    function updatePayouts(Payout[] calldata _payouts) external onlyOwner {
         for (uint8 i = 0; i < _payouts.length; i++) {
             Payout memory payout = _payouts[i];
             require(
                 receiversToPercent[payout.addr] != 0,
                 string("Receiver not found")
             );
-            setReceiverPercent(payout.addr, payout.percent);
+            this.setReceiverPercent(payout.addr, payout.percent);
         }
     }
 }

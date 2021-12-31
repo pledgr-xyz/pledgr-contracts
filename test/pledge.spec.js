@@ -21,7 +21,7 @@ describe("Pledge", () => {
     });
   });
 
-  describe("recieve", () => {
+  describe("distribute", () => {
     describe("with one receiver", async () => {
       let receiver;
       let sender;
@@ -46,11 +46,14 @@ describe("Pledge", () => {
         );
         const initialOwnerBalance = await provider.getBalance(pledge.owner());
 
-        await sender.sendTransaction({
+        // await pledge.connect(sender).distribute(ethers.utils.parseEther("1"));
+        const tx = await sender.sendTransaction({
           from: sender.address,
           to: pledge.address,
           value: ethers.utils.parseEther("1"),
         });
+        const txR = await tx.wait();
+        console.log(txR.gasUsed);
 
         expect(await provider.getBalance(receiver.address)).to.equal(
           initialReceiverBalance.add(ethers.utils.parseEther("0.4"))
@@ -62,9 +65,15 @@ describe("Pledge", () => {
     });
   });
 
+  // describe("receive", () => {
+  //   it("calls `distribute` with msg.value", {
+  //     // TODO
+  //   });
+  // });
+
   describe("setReceiverPercent", () => {
     let receiver1;
-    let receiver2
+    let receiver2;
     let pledge;
 
     beforeEach(async () => {
@@ -85,7 +94,7 @@ describe("Pledge", () => {
       const updatedReceiverPercent = await pledge.getReceiverPercent(
         receiver1.address
       );
-      console.log('updated receiver percent: ', updatedReceiverPercent);
+      console.log("updated receiver percent: ", updatedReceiverPercent);
       expect(updatedReceiverPercent).to.equal(30);
     });
 
@@ -94,7 +103,7 @@ describe("Pledge", () => {
       const updatedReceiver2Percent = await pledge.getReceiverPercent(
         receiver2.address
       );
-      console.log('updated receiver percent: ', updatedReceiver2Percent);
+      console.log("updated receiver percent: ", updatedReceiver2Percent);
       expect(updatedReceiver2Percent).to.equal(20);
     });
   });
