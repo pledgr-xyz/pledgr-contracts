@@ -27,3 +27,5 @@
 | `4655b073dc7a33c16858e4d682b6026e53f73aed` | 59546 | A few optimisations to distribute fn    |
 | `5023a5ee3d1f05f4eb42248b68eb6519f0ed7522` | 59517 | consolidate `distribute` into `receive` |
 | `4431b6a9a55c6ee3c235a4c95ccae13de0a34770` | 51040 | Push to `setPayout` empty array instead |
+
+Got gas down to 49111 for 1 array of Payouts

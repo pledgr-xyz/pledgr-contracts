@@ -23,8 +23,10 @@ describe("Pledge", () => {
         },
       ]);
 
+      const payout = await pledge.payouts(0);
       // TODO mock `setPayouts` and assert that `setPayouts` was called with correct args.
-      expect(await pledge.receiversToPercent(receiver.address)).to.equal(40);
+      expect(payout.addr).to.equal(receiver.address);
+      expect(payout.percent).to.equal(40);
     });
   });
 
@@ -86,8 +88,9 @@ describe("Pledge", () => {
           },
         ]);
 
-        expect(await pledge.receivers(0)).to.equal(receiver.address);
-        expect(await pledge.receiversToPercent(receiver.address)).to.equal(40);
+        const payout = await pledge.payouts(0);
+        expect(payout.addr).to.equal(receiver.address);
+        expect(payout.percent).to.equal(40);
       });
     });
 
@@ -117,11 +120,14 @@ describe("Pledge", () => {
             percent: 60,
           },
         ]);
-        expect(await pledge.receivers(0)).to.equal(receiverA.address);
-        expect(await pledge.receiversToPercent(receiverA.address)).to.equal(20);
 
-        expect(await pledge.receivers(1)).to.equal(receiverB.address);
-        expect(await pledge.receiversToPercent(receiverB.address)).to.equal(60);
+        const payoutA = await pledge.payouts(0);
+        expect(payoutA.addr).to.equal(receiverA.address);
+        expect(payoutA.percent).to.equal(20);
+
+        const payoutB = await pledge.payouts(1);
+        expect(payoutB.addr).to.equal(receiverB.address);
+        expect(payoutB.percent).to.equal(60);
       });
     });
   });
@@ -145,7 +151,8 @@ describe("Pledge", () => {
       it("updates receiver percentage", async () => {
         await pledge.setReceiverPercent(receiverA.address, 30);
 
-        expect(await pledge.receiversToPercent(receiverA.address)).to.equal(30);
+        const payout = await pledge.payouts(0);
+        expect(payout.percent).to.equal(30);
       });
     });
 
@@ -153,9 +160,8 @@ describe("Pledge", () => {
       it("updates receiver percentage", async () => {
         await pledge.setReceiverPercent(receiverB.address, 20);
 
-        expect(await pledge.receivers(0)).to.equal(receiverA.address);
-        expect(await pledge.receivers(1)).to.equal(receiverB.address);
-        expect(await pledge.receiversToPercent(receiverB.address)).to.equal(20);
+        const payout = await pledge.payouts(1);
+        expect(payout.percent).to.equal(20);
       });
     });
   });
