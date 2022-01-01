@@ -4,18 +4,26 @@ const { ethers, waffle } = require("hardhat");
 const { provider } = waffle;
 
 describe("Pledge", () => {
+  let pledge;
+
+  const deployContract = async (deployArgs) => {
+    const Pledge = await ethers.getContractFactory("PledgeV1");
+    pledge = await Pledge.deploy(deployArgs);
+    await pledge.deployed();
+  };
+
   describe("deployment", () => {
     it("Should set storage correctly", async function () {
       const [_, receiver] = await ethers.getSigners();
 
-      const Pledge = await ethers.getContractFactory("PledgeV1");
-      const pledge = await Pledge.deploy([
+      await deployContract([
         {
           addr: receiver.address,
           percent: 40,
         },
       ]);
-      await pledge.deployed();
+
+      // TODO mock `setPayouts` and assert that `setPayouts` was called with correct args.
       expect(await pledge.receiversToPercent(receiver.address)).to.equal(40);
     });
   });
@@ -24,19 +32,16 @@ describe("Pledge", () => {
     describe("with one receiver", async () => {
       let receiver;
       let sender;
-      let pledge;
 
       beforeEach(async () => {
         [_, receiver, sender] = await ethers.getSigners();
 
-        const Pledge = await ethers.getContractFactory("PledgeV1");
-        pledge = await Pledge.deploy([
+        await deployContract([
           {
             addr: receiver.address,
             percent: 40,
           },
         ]);
-        await pledge.deployed();
       });
 
       it("executes distribution correctly", async () => {
@@ -65,28 +70,83 @@ describe("Pledge", () => {
     });
   });
 
-  // describe("receive", () => {
-  //   it("calls `distribute` with msg.value", {
-  //     // TODO
-  //   });
-  // });
+  describe("setPayouts", () => {
+    beforeEach(async () => {
+      [_, receiver, sender] = await ethers.getSigners();
+
+      await deployContract([
+        {
+          addr: receiver.address,
+          percent: 40,
+        },
+      ]);
+    });
+
+    describe("with no existing payouts", () => {
+      beforeEach(async () => {
+        await deployContract([]);
+      });
+
+      it("sets `receivers` and `receiversToPercent` storage", async () => {
+        [_, receiver] = await ethers.getSigners();
+
+        await pledge.setPayouts([
+          {
+            addr: receiver.address,
+            percent: 40,
+          },
+        ]);
+
+        expect(await pledge.receiversToPercent(receiver.address)).to.equal(40);
+      });
+    });
+
+    describe("with existing payouts", () => {
+      let receiverA;
+      let receiverB;
+
+      beforeEach(async () => {
+        [_, receiverA, receiverB] = await ethers.getSigners();
+
+        await deployContract([
+          {
+            addr: receiverA.address,
+            percent: 40,
+          },
+        ]);
+      });
+
+      it("overwrites `receivers` and `receiversToPercent` storage", async () => {
+        await pledge.setPayouts([
+          {
+            addr: receiverA.address,
+            percent: 20,
+          },
+          {
+            addr: receiverB.address,
+            percent: 60,
+          },
+        ]);
+
+        expect(await pledge.receiversToPercent(receiverA.address)).to.equal(20);
+        expect(await pledge.receiversToPercent(receiverB.address)).to.equal(60);
+      });
+    });
+  });
 
   describe("setReceiverPercent", () => {
     let receiver1;
     let receiver2;
-    let pledge;
 
     beforeEach(async () => {
       [_, receiver1, receiver2] = await ethers.getSigners();
 
-      const Pledge = await ethers.getContractFactory("PledgeV1");
-      pledge = await Pledge.deploy([
+      await deployContract([
         {
           addr: receiver1.address,
           percent: 40,
         },
       ]);
-      await pledge.deployed();
     });
 
     describe("when receiver exists", () => {
