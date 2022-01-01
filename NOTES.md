@@ -17,6 +17,7 @@
 | `acc3dd5d9f11c2dfb3f26616b0d940c1cb158887` | 1472915   | remove `getReceiversPercent` method     |
 | `e131659812fff331ca39845c25ee330b0693b4fc` | 1478397   | Fix `setPayout` bug                     |
 | `4431b6a9a55c6ee3c235a4c95ccae13de0a34770` | 1470655   | Push to `setPayout` empty array instead |
+| `1892273c15af506fca14e198b14de08e915406e9` | 1470470   | Don't check for payouts length          |
 
 ### `receive`
 

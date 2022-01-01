@@ -153,6 +153,7 @@ describe("Pledge", () => {
       it("updates receiver percentage", async () => {
         await pledge.setReceiverPercent(receiverB.address, 20);
 
+        expect(await pledge.receivers(0)).to.equal(receiverA.address);
         expect(await pledge.receivers(1)).to.equal(receiverB.address);
         expect(await pledge.receiversToPercent(receiverB.address)).to.equal(20);
       });
