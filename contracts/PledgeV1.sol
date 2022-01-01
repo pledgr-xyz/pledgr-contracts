@@ -25,9 +25,11 @@ contract PledgeV1 is Ownable {
         return receiversToPercent[_receiver];
     }
 
-    function distribute(uint256 _value) public payable {
+    // Receives eth and distributes to receivers
+    receive() external payable {
+        // 21055 initial gas
         uint8 _sumOfPercentages = 0; // max 100
-        uint256 _valueNorm = _value / 100;
+        uint256 _valueNorm = msg.value / 100;
         // Send percentage of _value to each receiver
         // 2749 (23832 cum.) gas to iterate over empty array
         for (uint8 i = 0; i < receivers.length; i++) {
@@ -60,13 +62,6 @@ contract PledgeV1 is Ownable {
 
         // 279 (59895 cum.) gas
         require(ownerSuccess, string(abi.encodePacked("ETH TRANSFER FAILED")));
-    }
-
-    // Receives eth and distributes to receivers
-    receive() external payable {
-        // 21055 initial gas
-        // 28 (21083 cum.) gas to call the function
-        distribute(msg.value);
     }
 
     // If msg.data is not empty
