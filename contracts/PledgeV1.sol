@@ -14,9 +14,7 @@ contract PledgeV1 is Ownable {
     mapping(address => uint8) public receiversToPercent; // receiving address => percentage (0-100)
 
     constructor(Payout[] memory _payouts) {
-        if (_payouts.length > 0) {
-            setPayouts(_payouts);
-        }
+        setPayouts(_payouts);
     }
 
     // Receives eth and distributes to receivers
