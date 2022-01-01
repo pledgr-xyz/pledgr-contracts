@@ -27,50 +27,45 @@ contract PledgeV1 is Ownable {
 
     function distribute(uint256 _value) public payable {
         uint8 _sumOfPercentages = 0; // max 100
+        uint256 _valueNorm = _value / 100;
         // Send percentage of _value to each receiver
+        // 2749 (23832 cum.) gas to iterate over empty array
         for (uint8 i = 0; i < receivers.length; i++) {
+            // 4670 (28502 cum.) gas to assign this variable
+            // 554 gas to execute receivers[i]
             address payable _receiver = receivers[i];
-
-            uint8 _receiverPercent = getReceiverPercent(receivers[i]);
-            uint256 _amountToSend = (_value / 100) * _receiverPercent;
+            // 4654 (33066 cum.) gas to assign this variable
+            uint8 _receiverPercent = receiversToPercent[_receiver];
+            // 820 (33800 cum.) gas to assign
+            // uint256 _amountToSend = (_value / 100) * _receiverPercent;
 
             // Attempt to pay receiver
-            (bool success, ) = _receiver.call{value: _amountToSend}("");
+            // 12464 (46264 cum.) gas
+            (bool success, ) = _receiver.call{
+                value: (_valueNorm) * _receiverPercent
+            }("");
             // Check payment was successful
-            require(
-                success,
-                string(
-                    abi.encodePacked(
-                        "Failed to send ",
-                        _amountToSend,
-                        " Ether to ",
-                        _receiver
-                    )
-                )
-            );
+            // 561 (46825 cum.) gas
+            require(success, string(abi.encodePacked("ETH TRANSFER FAILED")));
 
+            // 428 gas (47253 cum.)
             _sumOfPercentages += _receiverPercent; // Sum percentage distributions each time? -> one less thing in storage (owner and their distribution percentage)
         }
 
-        uint8 _remainingPercentage = 100 - _sumOfPercentages;
-        uint256 _amountForOwner = (_value / 100) * _remainingPercentage;
-
         // Send remainder to owner
-        (bool ownerSent, ) = owner().call{value: _amountForOwner}("");
-        require(
-            ownerSent,
-            string(
-                abi.encodePacked(
-                    "Failed to send ",
-                    _amountForOwner,
-                    " Ether to owner"
-                )
-            )
-        );
+        // 12363 (59616 cum.) gas
+        (bool ownerSuccess, ) = owner().call{
+            value: (_valueNorm) * (100 - _sumOfPercentages)
+        }("");
+
+        // 279 (59895 cum.) gas
+        require(ownerSuccess, string(abi.encodePacked("ETH TRANSFER FAILED")));
     }
 
     // Receives eth and distributes to receivers
     receive() external payable {
+        // 21055 initial gas
+        // 28 (21083 cum.) gas to call the function
         distribute(msg.value);
     }
 

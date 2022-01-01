@@ -17,3 +17,7 @@ Gas: 1290827
 ### receive method
 
 Gas for tx: 62200
+
+#### With various optimisations
+
+Gas for tx: 59546

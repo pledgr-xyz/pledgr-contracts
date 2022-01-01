@@ -52,8 +52,9 @@ describe("Pledge", () => {
           to: pledge.address,
           value: ethers.utils.parseEther("1"),
         });
+
         const txR = await tx.wait();
-        console.log(txR.gasUsed);
+        console.log("Transaction gas:", txR.gasUsed);
 
         expect(await provider.getBalance(receiver.address)).to.equal(
           initialReceiverBalance.add(ethers.utils.parseEther("0.4"))
