@@ -17,14 +17,6 @@ contract PledgeV1 is Ownable {
         setPayouts(_payouts);
     }
 
-    function getReceiverPercent(address payable _receiver)
-        public
-        view
-        returns (uint8)
-    {
-        return receiversToPercent[_receiver];
-    }
-
     // Receives eth and distributes to receivers
     receive() external payable {
         // 21055 initial gas

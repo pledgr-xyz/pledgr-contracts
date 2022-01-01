@@ -16,8 +16,7 @@ describe("Pledge", () => {
         },
       ]);
       await pledge.deployed();
-
-      expect(await pledge.getReceiverPercent(receiver.address)).to.equal(40);
+      expect(await pledge.receiversToPercent(receiver.address)).to.equal(40);
     });
   });
 
@@ -90,22 +89,20 @@ describe("Pledge", () => {
       await pledge.deployed();
     });
 
-    it("when receiver exists", async () => {
-      await pledge.setReceiverPercent(receiver1.address, 30);
-      const updatedReceiverPercent = await pledge.getReceiverPercent(
-        receiver1.address
-      );
-      console.log("updated receiver percent: ", updatedReceiverPercent);
-      expect(updatedReceiverPercent).to.equal(30);
+    describe("when receiver exists", () => {
+      it("updates receiver percentage", async () => {
+        await pledge.setReceiverPercent(receiver1.address, 30);
+
+        expect(await pledge.receiversToPercent(receiver1.address)).to.equal(30);
+      });
     });
 
-    it("when receiver does not exist", async () => {
-      await pledge.setReceiverPercent(receiver2.address, 20);
-      const updatedReceiver2Percent = await pledge.getReceiverPercent(
-        receiver2.address
-      );
-      console.log("updated receiver percent: ", updatedReceiver2Percent);
-      expect(updatedReceiver2Percent).to.equal(20);
+    describe("when receiver does not exist", () => {
+      it("updates receiver percentage", async () => {
+        await pledge.setReceiverPercent(receiver2.address, 20);
+
+        expect(await pledge.receiversToPercent(receiver2.address)).to.equal(20);
+      });
     });
   });
 });
