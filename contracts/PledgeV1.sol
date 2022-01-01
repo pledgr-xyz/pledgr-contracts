@@ -14,7 +14,9 @@ contract PledgeV1 is Ownable {
     mapping(address => uint8) public receiversToPercent; // receiving address => percentage (0-100)
 
     constructor(Payout[] memory _payouts) {
-        setPayouts(_payouts);
+        if (_payouts.length > 0) {
+            setPayouts(_payouts);
+        }
     }
 
     // Receives eth and distributes to receivers
@@ -65,7 +67,7 @@ contract PledgeV1 is Ownable {
         receivers = new address payable[](_payouts.length);
         for (uint8 i = 0; i < _payouts.length; i++) {
             Payout memory payout = _payouts[i];
-            receivers.push(payout.addr);
+            receivers[i] = payout.addr;
             receiversToPercent[payout.addr] = payout.percent; // Allocate receivers and their percentages of each total payment
         }
     }

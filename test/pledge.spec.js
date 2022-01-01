@@ -71,17 +71,6 @@ describe("Pledge", () => {
   });
 
   describe("setPayouts", () => {
-    beforeEach(async () => {
-      [_, receiver, sender] = await ethers.getSigners();
-
-      await deployContract([
-        {
-          addr: receiver.address,
-          percent: 40,
-        },
-      ]);
-    });
-
     describe("with no existing payouts", () => {
       beforeEach(async () => {
         await deployContract([]);
@@ -97,6 +86,7 @@ describe("Pledge", () => {
           },
         ]);
 
+        expect(await pledge.receivers(0)).to.equal(receiver.address);
         expect(await pledge.receiversToPercent(receiver.address)).to.equal(40);
       });
     });
@@ -127,23 +117,25 @@ describe("Pledge", () => {
             percent: 60,
           },
         ]);
-
+        expect(await pledge.receivers(0)).to.equal(receiverA.address);
         expect(await pledge.receiversToPercent(receiverA.address)).to.equal(20);
+
+        expect(await pledge.receivers(1)).to.equal(receiverB.address);
         expect(await pledge.receiversToPercent(receiverB.address)).to.equal(60);
       });
     });
   });
 
   describe("setReceiverPercent", () => {
-    let receiver1;
-    let receiver2;
+    let receiverA;
+    let receiverB;
 
     beforeEach(async () => {
-      [_, receiver1, receiver2] = await ethers.getSigners();
+      [_, receiverA, receiverB] = await ethers.getSigners();
 
       await deployContract([
         {
-          addr: receiver1.address,
+          addr: receiverA.address,
           percent: 40,
         },
       ]);
@@ -151,17 +143,18 @@ describe("Pledge", () => {
 
     describe("when receiver exists", () => {
       it("updates receiver percentage", async () => {
-        await pledge.setReceiverPercent(receiver1.address, 30);
+        await pledge.setReceiverPercent(receiverA.address, 30);
 
-        expect(await pledge.receiversToPercent(receiver1.address)).to.equal(30);
+        expect(await pledge.receiversToPercent(receiverA.address)).to.equal(30);
       });
     });
 
     describe("when receiver does not exist", () => {
       it("updates receiver percentage", async () => {
-        await pledge.setReceiverPercent(receiver2.address, 20);
+        await pledge.setReceiverPercent(receiverB.address, 20);
 
-        expect(await pledge.receiversToPercent(receiver2.address)).to.equal(20);
+        expect(await pledge.receivers(1)).to.equal(receiverB.address);
+        expect(await pledge.receiversToPercent(receiverB.address)).to.equal(20);
       });
     });
   });
