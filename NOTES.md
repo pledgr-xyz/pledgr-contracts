@@ -14,7 +14,8 @@
 | `d98c5dd667ddf04af414e782f6447ba6ea8fcd16` | 1290827   |                                         |
 | `4655b073dc7a33c16858e4d682b6026e53f73aed` | 1526729   | added various fns                       |
 | `5023a5ee3d1f05f4eb42248b68eb6519f0ed7522` | 1515808   | consolidate `distribute` into `receive` |
-| `acc3dd5d9f11c2dfb3f26616b0d940c1cb158887` | 1472927   | remove `getReceiversPercent` method     |
+| `acc3dd5d9f11c2dfb3f26616b0d940c1cb158887` | 1472915   | remove `getReceiversPercent` method     |
+| `e131659812fff331ca39845c25ee330b0693b4fc` | 1478397   | Fix `setPayout` bug                     |
 
 ### `receive`
 

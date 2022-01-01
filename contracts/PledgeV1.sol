@@ -64,10 +64,10 @@ contract PledgeV1 is Ownable {
     // Updates User's distribution receivers and their percentages
     // Can be called from inside and outside the contract but only by the User
     function setPayouts(Payout[] memory _payouts) public onlyOwner {
-        receivers = new address payable[](_payouts.length);
+        receivers = new address payable[](0);
         for (uint8 i = 0; i < _payouts.length; i++) {
             Payout memory payout = _payouts[i];
-            receivers[i] = payout.addr;
+            receivers.push(payout.addr);
             receiversToPercent[payout.addr] = payout.percent; // Allocate receivers and their percentages of each total payment
         }
     }
